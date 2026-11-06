@@ -23,6 +23,20 @@ Starts the app with Electron developer tools opened automatically. Use this when
 
 ## Building the Installers
 
+### Web UI
+
+During packaging, the web UI is copied into the app from the location configured in `./config/settings.json`:
+
+```json
+{
+  "react": { "buildPath": "../web-ui/build" },
+  "webUI": "bundled"
+}
+```
+
+- `react.buildPath`: a local web-ui build (`npm run build` in the web-ui repo), alternatively `react.buildUrl` to download it from an update server
+- `webUI`: by default, the installed app downloads the web UI from the update server at every launch (which bundle depends on the app version) and installs app updates. With `"bundled"`, the app always runs the web UI it was packaged with and neither downloads web bundles nor installs app updates - use this for builds from your own fork, so that a locally built app runs your web-ui and is not replaced by an official release.
+
 
 ### Windows
 

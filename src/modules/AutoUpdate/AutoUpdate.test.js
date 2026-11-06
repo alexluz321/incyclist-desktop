@@ -12,6 +12,8 @@ jest.mock('../zip',()=>{
         }))
     }
 })
+jest.mock('../buildInfo',()=>({ isBundledWebUI: jest.fn(()=>false) }))
+const { isBundledWebUI } = require('../buildInfo')
 
 
 describe( 'AutoUpdate',()=> {
@@ -255,6 +257,49 @@ describe( 'AutoUpdate',()=> {
         })
 
 
+    })
+
+    describe('bundled web UI',()=>{
+
+        let a;
+
+        beforeEach( ()=>{
+            isBundledWebUI.mockReturnValue(true)
+            axios.get = jest.fn()
+            const app = {
+                settings:{},
+                getName: ()=>'Incyclist',
+                getVersion: ()=>'1.0',
+            }
+            a = new AutoUpdate(app);
+            a.autoUpdater = { checkForUpdates: jest.fn(), once: jest.fn() }
+        })
+
+        afterEach( ()=>{
+            isBundledWebUI.mockReturnValue(false)
+        })
+
+        test('does not check the update server for a web bundle',async ()=>{
+            const res = await a.performWebUpdateCheck()
+
+            expect(res).toEqual({available:false})
+            expect(axios.get).not.toHaveBeenCalled()
+        })
+
+        test('does not check for app updates',async ()=>{
+            const res = await a.checkForAppUpdates()
+
+            expect(res).toEqual({available:false})
+            expect(a.autoUpdater.checkForUpdates).not.toHaveBeenCalled()
+        })
+
+        test('overall update check reports no update',async ()=>{
+            const res = await a.checkForUpdates()
+
+            expect(res.available).toBe(false)
+            expect(axios.get).not.toHaveBeenCalled()
+            expect(a.autoUpdater.checkForUpdates).not.toHaveBeenCalled()
+        })
     })
 
 

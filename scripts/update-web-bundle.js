@@ -5,6 +5,7 @@ const axios = require('axios')
 const package_json = require('../package.json')
 const os = require('os');
 const { ZipData } = require('../src/modules/zip')
+const { writeBuildInfo } = require('../src/modules/buildInfo')
 const readline = require('node:readline');
 const { version,name} = package_json
 
@@ -53,27 +54,34 @@ async function copyFromServer(url,targetDir) {
 function updateWebBundle(targetDir) {
     let buildPath;
     let buildUrl;
+    let webUI;
 
     const configFile = path.join(baseDir,'./config/settings.json')
 
     if (fs.existsSync(configFile)) {
-        const { react={} } = require('../config/settings.json')
+        const { react={}, webUI:webUISetting } = require('../config/settings.json')
         buildPath = react.buildPath
         buildUrl  = react.buildUrl
+        webUI     = webUISetting
     }
 
     return new Promise (done => {
         if (buildPath) {
             const reactBuildDir = path.join(baseDir,buildPath)
-           
+
             console.log('copy files from ',reactBuildDir)
             fs.cpSync(reactBuildDir,targetDir, {recursive: true})
+            writeBuildInfo(targetDir, webUI==='bundled' ? {webUI} : undefined)
+            console.log('web UI:', webUI==='bundled' ? 'bundled (no web bundle downloads, no app updates)' : 'downloaded from update server')
             done(0)
         
         }
         else if (buildUrl) {
             copyFromServer(buildUrl,targetDir)
-            .then(()=>done(0))
+            .then(()=>{
+                writeBuildInfo(targetDir, undefined)
+                done(0)
+            })
             .catch( (err)=> {
                 console.log( 'could not load from server, error:',err.message)
                 done(1)
