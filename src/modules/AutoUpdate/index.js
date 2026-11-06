@@ -11,6 +11,7 @@ const {sleep} = require('../../utils/sleep')
 const EventEmitter = require("events");
 const UpdaterFactory = require("./binding/factory");
 const { AppInfo, checkDir } = require("../../utils");
+const { isBundledWebUI } = require("../buildInfo");
 
 
 const TIMEOUT_WEB_CHECK = 1500
@@ -88,6 +89,12 @@ class AutoUpdate extends EventEmitter {
     }
 
     async checkForAppUpdates() {
+        if ( isBundledWebUI() ) {
+            // a locally built app must not be replaced by an official release
+            this.logger.logEvent ({message:'app update check skipped', reason:'bundled web UI'})
+            return { available:false }
+        }
+
         this.logger.logEvent ({message:'check for app updates'})
 
         const res = await this.performAppUpdateCheck()
@@ -157,8 +164,13 @@ class AutoUpdate extends EventEmitter {
 
 
     async performWebUpdateCheck() {
-        if ( this.settings.pageUrl!==undefined )  
+        if ( this.settings.pageUrl!==undefined )
             return { available:false }
+
+        if ( isBundledWebUI() ) {
+            this.logger.logEvent({message:'web update check skipped', reason:'bundled web UI'})
+            return { available:false }
+        }
 
         let updateServerUrl = this.settings.updateServerUrl || DEFAULT_UPDATE_SERVER_URL;
         let url = `${updateServerUrl}/api/v1/apps/${this.app.getName()}/${this.app.getVersion()}?uuid=${this.settings.uuid}`

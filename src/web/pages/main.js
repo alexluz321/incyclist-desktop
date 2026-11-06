@@ -3,6 +3,7 @@ const path = require('path')
 const {EventLogger }= require('gd-eventlog');
 const { getSourceDir } = require('../../utils');
 const NativeUISupport = require('../../features/ui/feature');
+const { isBundledWebUI, getBundledPageUrl } = require('../../modules/buildInfo');
 
 class MainWindow {
 
@@ -16,10 +17,11 @@ class MainWindow {
 
 
         //this.pageUrl = 'http://localhost:4000'; 
-        this.pageUrl = 'file://'+path.join(getSourceDir() ,'../build/index.html'+"#ride"); 
-        if ( this.app.settings.pageDir!==undefined) 
-            this.pageUrl = 'file://'+path.join( this.app.settings.pageDir ,'index.html'+"#ride"); 
-        if ( this.app.settings.pageUrl!==undefined) {
+        this.pageUrl = getBundledPageUrl();
+        const bundled = isBundledWebUI()
+        if ( this.app.settings.pageDir!==undefined && !bundled)
+            this.pageUrl = 'file://'+path.join( this.app.settings.pageDir ,'index.html'+"#ride");
+        if ( this.app.settings.pageUrl!==undefined && !bundled) {
             if (this.pageUrl.endsWith('/start') || this.pageUrl.startsWith('file:'))
                 this.pageUrl = this.app.settings.pageUrl;
             else 
