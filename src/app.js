@@ -1,10 +1,11 @@
 const {EventLogger,ConsoleAdapter,FileAdapter}= require('gd-eventlog')
-const { app,globalShortcut,ipcMain,crashReporter,electron,Menu,powerSaveBlocker } =  require('electron');
+const { app,globalShortcut,ipcMain,crashReporter,electron,powerSaveBlocker } =  require('electron');
 const EventEmitter = require('node:events');
 const path = require('node:path')
 const axios = require('axios')
 const os = require('node:os');
 const RestLogAdapter = require('./modules/RestLogAdapter')
+const { setApplicationMenu } = require('./modules/menu')
 const {checkDir,deleteFile,getLogDirectory,gnerateUUID} = require( './utils')
 const AutoUpdate = require('./modules/AutoUpdate')
 const {initFeaturesApp} = require('./features');
@@ -73,7 +74,7 @@ class IncyclistApp
 
         app.incyclistApp = this
         if (process.platform==='darwin') {
-            Menu.setApplicationMenu(null);
+            setApplicationMenu();
         }
 
 

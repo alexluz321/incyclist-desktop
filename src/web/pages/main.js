@@ -3,6 +3,7 @@ const path = require('path')
 const {EventLogger }= require('gd-eventlog');
 const { getSourceDir } = require('../../utils');
 const NativeUISupport = require('../../features/ui/feature');
+const { attachContextMenu } = require('../../modules/menu');
 
 class MainWindow {
 
@@ -67,6 +68,7 @@ class MainWindow {
             } 
         })
         this.win.removeMenu();
+        attachContextMenu(this.win);
         if (process.env.DEBUG) {
             this.win.webContents.openDevTools();
                     

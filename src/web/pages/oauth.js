@@ -3,6 +3,7 @@ const path = require('path')
 const {EventLogger }= require('gd-eventlog');
 const EventEmitter = require('events');
 const { getSourceDir } = require('../../utils');
+const { attachContextMenu } = require('../../modules/menu');
 
 const MAIN_WIN_WIDTH = 400;
 const MAIN_WIN_HEIGHT = 300;
@@ -84,7 +85,7 @@ class OAuthWindow extends EventEmitter{
                 preload: this.preloadUrl
             } 
         })
-
+        attachContextMenu(this.win);
 
         this.win.on('closed',this.onClosed.bind(this));
         this.win.once('ready-to-show',this.onReady.bind(this));
